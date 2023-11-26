@@ -17,7 +17,7 @@ def conversao_tempo_str(tempo_segundos):
 
 
 class Driver:
-    def __init__(self, name, phone, company, hour=None, status=None, dock=None):
+    def __init__(self, name, phone, company, hour=None, status=None, dock=None, hour_allocation =None):
         self.name = name
         self.phone = phone
         self.company = company
@@ -25,6 +25,7 @@ class Driver:
         self.hour = hour  
         self.status = status
         self.dock = dock  
+        self.hour_allocation = hour_allocation
 
 class Dock:
     def __init__(self, dock_number):
@@ -51,11 +52,12 @@ class Drivers:
                 lista_final.append(it)
         return lista_final
     
-    def change_driver_dock(self,name_driver,new_status,new_dock):
+    def change_driver_dock(self,name_driver,new_status,new_dock=None,hora_atual=None):
         for it in self.driver_list:
             if it.name == name_driver:
-                it.status = new_status
+                it.status = int(new_status)
                 it.dock = new_dock
+                it.hour_allocation = hora_atual
     
     def display_all(self):
         for it in self.driver_list:
@@ -66,7 +68,12 @@ class Drivers:
             print(it.status)
             print(it.dock)
 
-    
+    def search_driver_name(self,name):
+        for it in self.driver_list:
+            if it.name == name:
+                return it
+            
+
 class Docks:
     def __init__(self):
         self.dock_list = []
@@ -148,7 +155,7 @@ class AppGUI(ctk.CTk):
         ctk.set_widget_scaling(new_scaling_float)  
     
     def display_standby_drivers(self):
-        self.coluna_2_estrutura = ctk.CTkFrame(self, width=250)
+        self.coluna_2_estrutura = ctk.CTkScrollableFrame(self, width=300)
         self.coluna_2_estrutura.grid(row=0, column=1, padx=(30, 0), pady=(20, 0), sticky="nsew")
 
         self.title_label = ctk.CTkLabel(self.coluna_2_estrutura, text="Motoristas em espera", font=ctk.CTkFont(size=25, weight="bold"))
@@ -159,25 +166,26 @@ class AppGUI(ctk.CTk):
         k = 1
         for i_LIST in dados_motoristas:
             # Create a subframe
-            subframe = ctk.CTkFrame(self.coluna_2_estrutura)
+            subframe = ctk.CTkFrame(self.coluna_2_estrutura,fg_color="dark gray")
+            #subframe.configure(fg_color="light_gray")
             subframe.grid(row=k, column=0, padx=(10, 10), pady=(0, 10), sticky="nsew")
 
             subframe.grid_columnconfigure(0, weight=1)
             subframe.grid_columnconfigure(1, weight=1)
 
             # COLUNA 1
-            self.nome_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.name}")
+            self.nome_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.name}",text_color="black")
             self.nome_widget_motorista.grid(row=0, column=0, padx=(10, 0), pady=(10, 5), sticky="w")
 
-            self.telefone_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.phone}")
+            self.telefone_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.phone}",text_color="black")
             self.telefone_widget_motorista.grid(row=1, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
 
-            self.empresa_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.company}")
+            self.empresa_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.company}",text_color="black")
             self.empresa_widget_motorista.grid(row=2, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
 
             # COLUNA 2
             tempo_espera = (dt.datetime.now()-i_LIST.hour).total_seconds()
-            tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"))
+            tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"),text_color="black")
             tempo_widget_motorista.grid(row=0, column=1, padx=(10, 15), pady=(10, 0), sticky="E")
             self.tempo_widgets.append(tempo_widget_motorista)  # Add tempo widget to the list
 
@@ -185,7 +193,7 @@ class AppGUI(ctk.CTk):
                                     command=lambda name=i_LIST.name: self.display_popup_alocacao_cais(name))
             self.botao.grid(row=2, column=1, padx=(10, 15), pady=(0, 15), sticky="E")
             k += 1
-        self.update_waiting_times()
+        
         
     def update_waiting_times(self):
         dados_motoristas = self.app.drivers.display_drivers(0)
@@ -194,8 +202,18 @@ class AppGUI(ctk.CTk):
         for i, i_LIST in enumerate(dados_motoristas):
             tempo_espera = (dt.datetime.now() - i_LIST.hour).total_seconds()
             str_tempo_espera = conversao_tempo_str(tempo_espera)
-            #self.tempo_widgets[i].configure(text="{} Min".format(int(tempo_espera)))
             self.tempo_widgets[i].configure(text=str_tempo_espera)
+
+        dados_motoristas2 = self.app.drivers.display_drivers(1)
+
+        # Update waiting time for each driver
+        for i, i_LIST in enumerate(dados_motoristas2):
+            print(i)
+            print(self.tempo_widgets2)
+            tempo_espera = (dt.datetime.now() - i_LIST.hour_allocation).total_seconds()
+            str_tempo_espera = conversao_tempo_str(tempo_espera)
+            #self.tempo_widgets[i].configure(text="{} Min".format(int(tempo_espera)))
+            self.tempo_widgets2[i].configure(text=str_tempo_espera)
 
     # Schedule the function to be called again after a short interval (e.g., 1000 milliseconds)
         self.after(1000, self.update_waiting_times)
@@ -205,8 +223,8 @@ class AppGUI(ctk.CTk):
         self.popup_window = ctk.CTkToplevel() 
         self.popup_window.geometry("400x300")
         self.popup_window.title("Registo de camionista")
-        ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
-        ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+        #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+        #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.popup_window.attributes('-topmost', 'true')
 
         self.popup_window.grid_columnconfigure(0, weight=1)  # Set weight to 1 for dynamic width
@@ -242,8 +260,8 @@ class AppGUI(ctk.CTk):
         self.popup_cais = ctk.CTkToplevel() 
         self.popup_cais.geometry("400x150")
         self.popup_cais.title("Atribuicao Cais")
-        ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
-        ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+        #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+        #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.popup_cais.attributes('-topmost', 'true')
         
         self.popup_cais.grid_columnconfigure(0, weight=1)  # Set weight to 1 for dynamic width
@@ -259,12 +277,32 @@ class AppGUI(ctk.CTk):
         self.submit_button = ctk.CTkButton(self.popup_cais, width=300,text="Alocar cais",command=lambda: self.submit_dock(nome))
         self.submit_button.grid(row=2,column=0,pady=20)
 
+    def display_popup_remocao_driver(self,nome):
+        self.popup_rem = ctk.CTkToplevel() 
+        self.popup_rem.geometry("400x150")
+        self.popup_rem.title("Finalização de motorista")
+        #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
+        #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
+        self.popup_rem.attributes('-topmost', 'true')
+        
+        self.popup_rem.grid_columnconfigure(2, weight=1)  # Set weight to 1 for dynamic width
+        self.popup_rem.grid_rowconfigure(1, weight=1)
+
+        self.legenda_cais = ctk.CTkLabel(self.popup_rem, text="Pretende removar motorista?")
+        self.legenda_cais.grid(row=0,columnspan=1,pady=(10,3))
+
+        self.yes_button = ctk.CTkButton(self.popup_rem, width=150,text="Sim",command=lambda: self.remove_driver(nome))
+        self.yes_button.grid(row=1,column=0,pady=20)
+
+        self.no_button = ctk.CTkButton(self.popup_rem, width=150,text="Não",command=self.popup_rem.destroy)
+        self.no_button.grid(row=1,column=1,pady=20)
+
+
     def submit_dock(self,nome):
         num_cais = int(self.combo_cais.get())
-        self.app.drivers.change_driver_dock(nome,1,num_cais)
+        hora_atual = dt.datetime.now() 
+        self.app.drivers.change_driver_dock(nome,1,num_cais,hora_atual)
         self.app.docks.change_availability(num_cais,False)
-        print(self.app.drivers.display_all())
-        print(self.app.docks.display_docks(False))
         self.update_gui()
         self.popup_cais.destroy()
 
@@ -280,7 +318,19 @@ class AppGUI(ctk.CTk):
 
         self.display_standby_drivers()
         self.popup_window.destroy()
-        
+    
+    def remove_driver(self,nome):
+        driver = self.app.drivers.search_driver_name(nome)
+        doca = driver.dock
+
+        self.app.drivers.change_driver_dock(nome,2,doca)
+
+        self.app.docks.change_availability(doca,True)
+
+        self.popup_rem.destroy()
+        self.update_gui()
+        print(self.app.drivers.display_all())
+
 
     def display_allocated_drivers(self):
 
@@ -290,9 +340,10 @@ class AppGUI(ctk.CTk):
         self.title_label = ctk.CTkLabel(self.coluna_3_estrutura, text="Motoristas em carga", font=ctk.CTkFont(size=25, weight="bold"))
         self.title_label.grid(row=0, column=0, padx=(10, 10), pady=(0, 18), sticky="n")
         
-        dados_motoristas = self.app.drivers.display_drivers(1)
+        dados_motoristas2 = self.app.drivers.display_drivers(1)
+        self.tempo_widgets2 = []  # List to store tempo widgets
         k = 1
-        for i_LIST in dados_motoristas:
+        for i_LIST in dados_motoristas2:
             # Create a subframe
             subframe = ctk.CTkFrame(self.coluna_3_estrutura)
             subframe.grid(row=k, column=0, padx=(10, 10), pady=(0, 10), sticky="nsew")
@@ -310,19 +361,23 @@ class AppGUI(ctk.CTk):
             tempo_espera = int((dt.datetime.now()-i_LIST.hour).total_seconds() // 60)
 
             #COLUNA2
-            self.tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"))
-            self.tempo_widget_motorista.grid(row=0, column=1, padx=(10, 10), pady=(10, 5), sticky="e")
+            tempo_espera = (dt.datetime.now()-i_LIST.hour_allocation).total_seconds()
+            tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"))
+            tempo_widget_motorista.grid(row=1, column=1, padx=(10, 15), pady=(10, 0), sticky="E")
+            self.tempo_widgets2.append(tempo_widget_motorista)  
 
             cais = i_LIST.dock
             self.cais_widget_motorista = ctk.CTkLabel(subframe, text=f"Cais {cais}", font=ctk.CTkFont(size=18, weight="bold"))
-            self.cais_widget_motorista.grid(row=1, column=1, padx=(10, 10), pady=(0, 0), sticky="e")
+            self.cais_widget_motorista.grid(row=0, column=1, padx=(10, 10), pady=(0, 0), sticky="e")
 
-            
+           
 
-            self.botao = ctk.CTkButton(master=subframe, text=f"Remover motorista", width=100)
-                                      # command= lambda: self.display_popup_alocacao_cais(i_LIST.name))
+            self.botao = ctk.CTkButton(master=subframe, text=f"Remover motorista", width=100,
+                                       command= lambda: self.display_popup_remocao_driver(i_LIST.name))
             self.botao.grid(row=2, column=1, padx=(10, 10), pady=(0, 15), sticky="e")
             k += 1
+
+        self.update_waiting_times()
 
     def display_docks(self):
         self.c4est_imagme = ctk.CTkFrame(self, width=250)
@@ -403,28 +458,3 @@ class App:
 
 app = App()
 app.app_gui.mainloop()
-
-
-"""
-# Create drivers
-driver1 = Driver("John Doe", "123456789", "ABC Company")
-driver2 = Driver("Jane Smith", "987654321", "XYZ Company")
-
-# Create docks
-dock1 = Dock(1)
-dock2 = Dock(2)
-
-# Add drivers to the app
-app.drivers.add_driver(driver1)
-app.drivers.add_driver(driver2)
-
-# Add docks to the app
-app.docks.add_dock(dock1)
-app.docks.add_dock(dock2)
-
-# Allocate a driver to a dock using events
-app.events.handle_allocate_driver(driver1, dock1)
-
-# Remove a driver from a dock using events
-app.events.handle_remove_driver(driver1)
-"""
