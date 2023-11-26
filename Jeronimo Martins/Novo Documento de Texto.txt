@@ -1,0 +1,26 @@
+Transportes
+Stocks
+Movimentos
+Esperas
+Sobreprodução
+Sobreprocessamento
+Defeitos
+Skills
+
+Processos atuais: entrada de camião externo, saída de camião externo, entrada de camião da casa
+
+
+Problemas/Situação atual:
+
+Porteiro ter que ir levar guias dos frescos (5/10' ausente, fila aumenta)
+Não há standard de registo no Excel e WPMS
+Porteiros têm que estar atentos para atribuição de cais, nessa altura têm de ligar ao camionista a informar.
+Impressão desordenada e, por vezes, atrasada dos documentos (Faturação + protocolo)
+Preenchimento de papel de temperaturas pelos porteiros (info repetida do talão)
+Escrita da matrícula em cima para identificar lote de folhas (desnecessário dado que está já na folha)
+Vigilante tem que assinar todas as folhas (desnecessário - carimbo?)
+
+
+Possíveis soluções:
+
+Atribuição cais (power apps)
