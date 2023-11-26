@@ -5,6 +5,7 @@ import pandas as pd
 import datetime as dt
 import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
+t =2 
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
