@@ -5,7 +5,6 @@ import pandas as pd
 import datetime as dt
 import tkinter as tk
 from PIL import Image, ImageTk, ImageDraw
-t =2 
 
 ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
 ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
@@ -111,27 +110,29 @@ class AppGUI(ctk.CTk):
         super().__init__()
 
         self.app = app_instance
-        self.title("Gestão de cais JM")
-        self.geometry(f"{1100}x{580}")
+        self.title("Dock management app")
+        self.geometry(f"{1100}x{500}")
 
         self.grid_columnconfigure((1,2,3), weight=0)
 
         self.grid_columnconfigure(0, weight=0)  # Set weight to 0 for fixed width
         self.grid_columnconfigure(1, weight=0)  # Set weight to 1 for dynamic width
+        self.grid_columnconfigure(2, weight=0)
+        self.grid_columnconfigure(3, weight=0)
 
         self.grid_rowconfigure(0, weight=1)
         
         self.sidebar_frame = ctk.CTkFrame(self, width=100, corner_radius=0)
         self.sidebar_frame.grid(row=0, column=0, rowspan=4, sticky="nsew")
         self.sidebar_frame.grid_rowconfigure(4, weight=1)
-        titulo_c1 = "Ações"
-        nome_botao1 = "Nova entrada"
+        titulo_c1 = "Actions"
+        nome_botao1 = "New entry"
         self.logo_label = ctk.CTkLabel(self.sidebar_frame, text=titulo_c1,font=ctk.CTkFont(size=20, weight="bold"))
         self.logo_label.grid(row=0, column=0, padx=20, pady=(20, 10))
         self.sidebar_button_1 = ctk.CTkButton(self.sidebar_frame,text=nome_botao1,command=self.display_popup_insercao_driver)
         self.sidebar_button_1.grid(row=1, column=0, padx=20, pady=10)
         self.sms_var = ctk.StringVar(value="on")
-        self.checkbox = ctk.CTkCheckBox(self.sidebar_frame, text="Envio SMS",
+        self.checkbox = ctk.CTkCheckBox(self.sidebar_frame, text="Message sending option",
                                      variable=self.sms_var, onvalue="on", offvalue="off")
         
         self.checkbox.grid(row=7,column=0,padx=20,pady=(20, 20),sticky='w')
@@ -156,10 +157,12 @@ class AppGUI(ctk.CTk):
         ctk.set_widget_scaling(new_scaling_float)  
     
     def display_standby_drivers(self):
-        self.coluna_2_estrutura = ctk.CTkScrollableFrame(self, width=300)
+        self.coluna_2_estrutura = ctk.CTkScrollableFrame(self, width=275)
         self.coluna_2_estrutura.grid(row=0, column=1, padx=(30, 0), pady=(20, 0), sticky="nsew")
+        self.coluna_2_estrutura.grid_columnconfigure(0, weight=1)
 
-        self.title_label = ctk.CTkLabel(self.coluna_2_estrutura, text="Motoristas em espera", font=ctk.CTkFont(size=25, weight="bold"))
+
+        self.title_label = ctk.CTkLabel(self.coluna_2_estrutura, text="Waiting drivers", font=ctk.CTkFont(size=25, weight="bold"))
         self.title_label.grid(row=0, column=0, padx=(10, 10), pady=(0, 18), sticky="n")
         
         dados_motoristas = self.app.drivers.display_drivers(0)
@@ -176,23 +179,23 @@ class AppGUI(ctk.CTk):
 
             # COLUNA 1
             self.nome_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.name}",text_color="black")
-            self.nome_widget_motorista.grid(row=0, column=0, padx=(10, 0), pady=(10, 5), sticky="w")
+            self.nome_widget_motorista.grid(row=0, column=0, padx=(10, 0),pady=(15,0), sticky="w")
 
             self.telefone_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.phone}",text_color="black")
-            self.telefone_widget_motorista.grid(row=1, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
+            self.telefone_widget_motorista.grid(row=1, column=0, padx=(10, 0), sticky="w")
 
             self.empresa_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.company}",text_color="black")
-            self.empresa_widget_motorista.grid(row=2, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
+            self.empresa_widget_motorista.grid(row=2, column=0, padx=(10, 0),pady=(0,15), sticky="w")
 
             # COLUNA 2
             tempo_espera = (dt.datetime.now()-i_LIST.hour).total_seconds()
             tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"),text_color="black")
-            tempo_widget_motorista.grid(row=0, column=1, padx=(10, 15), pady=(10, 0), sticky="E")
+            tempo_widget_motorista.grid(row=0, column=1, padx=(10, 15),pady=(15,0), sticky="E")
             self.tempo_widgets.append(tempo_widget_motorista)  # Add tempo widget to the list
 
-            self.botao = ctk.CTkButton(master=subframe, text=f"Atribuir cais", width=100,
+            self.botao = ctk.CTkButton(master=subframe, text=f"Allocate dock", width=100,
                                     command=lambda name=i_LIST.name: self.display_popup_alocacao_cais(name))
-            self.botao.grid(row=2, column=1, padx=(10, 15), pady=(0, 15), sticky="E")
+            self.botao.grid(row=2, column=1, padx=(10, 15),pady=(0,15),sticky="E")
             k += 1
         
         
@@ -222,8 +225,8 @@ class AppGUI(ctk.CTk):
     def display_popup_insercao_driver(self): 
 
         self.popup_window = ctk.CTkToplevel() 
-        self.popup_window.geometry("400x300")
-        self.popup_window.title("Registo de camionista")
+        self.popup_window.geometry("400x325")
+        self.popup_window.title("Driver registration")
         #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.popup_window.attributes('-topmost', 'true')
@@ -233,24 +236,24 @@ class AppGUI(ctk.CTk):
         self.popup_window.grid_rowconfigure(7, weight=1)
          # Create and pack widgets for name, phone number, and company
         self.name_label = ctk.CTkLabel(self.popup_window, text="Nome")
-        self.name_entry = ctk.CTkEntry(self.popup_window,width=300)
+        self.name_entry = ctk.CTkEntry(self.popup_window,width=250)
 
         self.name_label.grid(row=0,column=0,pady=(10,3))
         self.name_entry.grid(row=1,column=0,pady=(0,6))
     
-        self.phone_label = ctk.CTkLabel(self.popup_window, text="Contacto telefónico")
-        self.phone_entry = ctk.CTkEntry(self.popup_window, width=300)
+        self.phone_label = ctk.CTkLabel(self.popup_window, text="Phone contact")
+        self.phone_entry = ctk.CTkEntry(self.popup_window, width=250)
 
         self.phone_label.grid(row=2,column=0,pady=(10,3))
         self.phone_entry.grid(row=3,column=0,pady=(0,6))
 
-        self.company_label = ctk.CTkLabel(self.popup_window, text="Empresa")
-        self.company_entry = ctk.CTkEntry(self.popup_window, width=300)
+        self.company_label = ctk.CTkLabel(self.popup_window, text="Company")
+        self.company_entry = ctk.CTkEntry(self.popup_window, width=250)
 
         self.company_label.grid(row=4,column=0,pady=(10,3))
         self.company_entry.grid(row=5,column=0,pady=(0,6))
 
-        self.submit_button = ctk.CTkButton(self.popup_window, width=300,text="Inserir",command=self.submit_info)
+        self.submit_button = ctk.CTkButton(self.popup_window, width=250,text="Insert",command=self.submit_info)
         self.submit_button.grid(row=6,column=0,pady=20)
 
         self.popup_window.grab_set()
@@ -260,7 +263,7 @@ class AppGUI(ctk.CTk):
     def display_popup_alocacao_cais(self,nome):
         self.popup_cais = ctk.CTkToplevel() 
         self.popup_cais.geometry("400x150")
-        self.popup_cais.title("Atribuicao Cais")
+        self.popup_cais.title("Dock allocation")
         #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.popup_cais.attributes('-topmost', 'true')
@@ -268,20 +271,20 @@ class AppGUI(ctk.CTk):
         self.popup_cais.grid_columnconfigure(0, weight=1)  # Set weight to 1 for dynamic width
         self.popup_cais.grid_rowconfigure(2, weight=1)
 
-        self.legenda_cais = ctk.CTkLabel(self.popup_cais, text="Cais a atribuir")
+        self.legenda_cais = ctk.CTkLabel(self.popup_cais, text="Dock to allocate")
         list_cais_disp = self.app.docks.display_docks(True)
-        self.combo_cais = ctk.CTkComboBox(self.popup_cais, values=list_cais_disp, width=300)
+        self.combo_cais = ctk.CTkComboBox(self.popup_cais, values=list_cais_disp, width=250)
 
         self.legenda_cais.grid(row=0,column=0,pady=(10,3))
         self.combo_cais.grid(row=1,column=0,pady=(0,6))
 
-        self.submit_button = ctk.CTkButton(self.popup_cais, width=300,text="Alocar cais",command=lambda: self.submit_dock(nome))
+        self.submit_button = ctk.CTkButton(self.popup_cais, width=250,text="Allocate dock",command=lambda: self.submit_dock(nome))
         self.submit_button.grid(row=2,column=0,pady=20)
 
     def display_popup_remocao_driver(self,nome):
         self.popup_rem = ctk.CTkToplevel() 
         self.popup_rem.geometry("400x150")
-        self.popup_rem.title("Finalização de motorista")
+        self.popup_rem.title("Driver exit")
         #ctk.set_appearance_mode("Dark")  # Modes: "System" (standard), "Dark", "Light"
         #ctk.set_default_color_theme("blue")  # Themes: "blue" (standard), "green", "dark-blue"
         self.popup_rem.attributes('-topmost', 'true')
@@ -289,13 +292,13 @@ class AppGUI(ctk.CTk):
         self.popup_rem.grid_columnconfigure(2, weight=1)  # Set weight to 1 for dynamic width
         self.popup_rem.grid_rowconfigure(1, weight=1)
 
-        self.legenda_cais = ctk.CTkLabel(self.popup_rem, text="Pretende removar motorista?")
+        self.legenda_cais = ctk.CTkLabel(self.popup_rem, text="Do you want to remove the driver?")
         self.legenda_cais.grid(row=0,columnspan=1,pady=(10,3))
 
-        self.yes_button = ctk.CTkButton(self.popup_rem, width=150,text="Sim",command=lambda: self.remove_driver(nome))
+        self.yes_button = ctk.CTkButton(self.popup_rem, width=150,text="Yes",command=lambda: self.remove_driver(nome))
         self.yes_button.grid(row=1,column=0,pady=20)
 
-        self.no_button = ctk.CTkButton(self.popup_rem, width=150,text="Não",command=self.popup_rem.destroy)
+        self.no_button = ctk.CTkButton(self.popup_rem, width=150,text="No",command=self.popup_rem.destroy)
         self.no_button.grid(row=1,column=1,pady=20)
 
 
@@ -335,10 +338,11 @@ class AppGUI(ctk.CTk):
 
     def display_allocated_drivers(self):
 
-        self.coluna_3_estrutura = ctk.CTkFrame(self, width=250)
+        self.coluna_3_estrutura = ctk.CTkScrollableFrame(self, width=275)
         self.coluna_3_estrutura.grid(row=0, column=2, padx=(30, 0), pady=(20, 0), sticky="nsew")
+        self.coluna_3_estrutura.grid_columnconfigure(0, weight=1)
 
-        self.title_label = ctk.CTkLabel(self.coluna_3_estrutura, text="Motoristas em carga", font=ctk.CTkFont(size=25, weight="bold"))
+        self.title_label = ctk.CTkLabel(self.coluna_3_estrutura, text="Drivers loading", font=ctk.CTkFont(size=25, weight="bold"))
         self.title_label.grid(row=0, column=0, padx=(10, 10), pady=(0, 18), sticky="n")
         
         dados_motoristas2 = self.app.drivers.display_drivers(1)
@@ -346,34 +350,40 @@ class AppGUI(ctk.CTk):
         k = 1
         for i_LIST in dados_motoristas2:
             # Create a subframe
-            subframe = ctk.CTkFrame(self.coluna_3_estrutura)
+            subframe = ctk.CTkFrame(self.coluna_3_estrutura,fg_color="dark gray")
             subframe.grid(row=k, column=0, padx=(10, 10), pady=(0, 10), sticky="nsew")
             subframe.columnconfigure([0,1],weight=1)
+            subframe.columnconfigure([0, 1], weight=1)
+            subframe.rowconfigure(0, weight=1)  # Set the weight for row 0
+            subframe.rowconfigure(1, weight=1)  # Set the weight for row 1
+            subframe.rowconfigure(2, weight=1)  # Set the weight for row 2
+
 
             #COLUNA1
-            self.nome_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.name}")
-            self.nome_widget_motorista.grid(row=0, column=0, padx=(10, 0), pady=(10, 5), sticky="w")
+            self.nome_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.name}",text_color="black")
+            self.nome_widget_motorista.grid(row=0, column=0, padx=(10, 0), pady=(15, 0), sticky="w")
 
-            self.telefone_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.phone}")
-            self.telefone_widget_motorista.grid(row=1, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
+            self.telefone_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.phone}",text_color="black")
+            self.telefone_widget_motorista.grid(row=1, column=0, padx=(10, 0), sticky="w")
 
-            self.empresa_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.company}")
-            self.empresa_widget_motorista.grid(row=2, column=0, padx=(10, 0), pady=(0, 5), sticky="w")
+            self.empresa_widget_motorista = ctk.CTkLabel(subframe, text=f"{i_LIST.company}",text_color="black")
+            self.empresa_widget_motorista.grid(row=2, column=0, padx=(10, 0), pady=(0, 15), sticky="w")
             tempo_espera = int((dt.datetime.now()-i_LIST.hour).total_seconds() // 60)
+
+              
+
+            cais = i_LIST.dock
+            self.cais_widget_motorista = ctk.CTkLabel(subframe, text=f"Dock {cais}", font=ctk.CTkFont(size=18, weight="bold"),text_color="black")
+            self.cais_widget_motorista.grid(row=0, column=1, padx=(10, 10), pady=(15, 0), sticky="e")
 
             #COLUNA2
             tempo_espera = (dt.datetime.now()-i_LIST.hour_allocation).total_seconds()
-            tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"))
-            tempo_widget_motorista.grid(row=1, column=1, padx=(10, 15), pady=(10, 0), sticky="E")
-            self.tempo_widgets2.append(tempo_widget_motorista)  
-
-            cais = i_LIST.dock
-            self.cais_widget_motorista = ctk.CTkLabel(subframe, text=f"Cais {cais}", font=ctk.CTkFont(size=18, weight="bold"))
-            self.cais_widget_motorista.grid(row=0, column=1, padx=(10, 10), pady=(0, 0), sticky="e")
-
+            tempo_widget_motorista = ctk.CTkLabel(subframe, text=f"{tempo_espera} Min", font=ctk.CTkFont(size=20, weight="bold"),text_color="black")
+            tempo_widget_motorista.grid(row=1, column=1, padx=(10, 15), sticky="e")
+            self.tempo_widgets2.append(tempo_widget_motorista)
            
 
-            self.botao = ctk.CTkButton(master=subframe, text=f"Remover motorista", width=100,
+            self.botao = ctk.CTkButton(master=subframe, text=f"Remove driver", width=100,
                                        command= lambda: self.display_popup_remocao_driver(i_LIST.name))
             self.botao.grid(row=2, column=1, padx=(10, 10), pady=(0, 15), sticky="e")
             k += 1
@@ -381,23 +391,23 @@ class AppGUI(ctk.CTk):
         self.update_waiting_times()
 
     def display_docks(self):
-        self.c4est_imagme = ctk.CTkFrame(self, width=250)
+        self.c4est_imagme = ctk.CTkFrame(self, width=300)
         self.c4est_imagme.grid(row=0, column=3, padx=(20, 0), pady=(20, 0), sticky="ne")
         self.c4est_imagme.grid_columnconfigure(3, weight=1)
 
         # Label for the title
-        self.title_label = ctk.CTkLabel(self.c4est_imagme, text="Ocupação", font=ctk.CTkFont(size=25, weight="bold"))
-        self.title_label.grid(row=0, column=0, padx=(10, 90), pady=(0, 10), sticky="n")
+        self.title_label = ctk.CTkLabel(self.c4est_imagme, text="Occupation", font=ctk.CTkFont(size=25, weight="bold"))
+        self.title_label.grid(row=0, column=0, padx=(10, 10), pady=(0, 10), sticky="n")
 
         # Load the image
         image_path = "docks_image.png"
         original_image = Image.open(image_path)
-        resized_image = original_image.resize((250, 500), Image.ANTIALIAS)
+        resized_image = original_image.resize((300, 600), Image.ANTIALIAS)
         self.tk_image = ImageTk.PhotoImage(resized_image)
         #self.tk_image = ImageTk.PhotoImage(original_image)
 
         # Create a Canvas widget for drawing on top of the image
-        self.canvas = tk.Canvas(self.c4est_imagme, bg="white", width=250, height=500)
+        self.canvas = tk.Canvas(self.c4est_imagme, bg="white", width=300, height=600)
         self.canvas.create_image(0, 0, anchor=tk.NW, image=self.tk_image)
         self.canvas.grid(row=2, column=0, sticky="nw")
 
@@ -406,13 +416,13 @@ class AppGUI(ctk.CTk):
 
         for j in ocupados:
             # Draw a red rectangle
-            trapeze_coords = [147, 35, 
-                            176, 52,  
-                            70, 115, 
-                            70, 81]
+            trapeze_coords = [176.4, 42, 
+                            211.2, 62.4,  
+                            84, 138, 
+                            84, 97.2]
             
 
-            modified_list = [num + 44.5*(j-1) if i % 2 != 0 else num for i, num in enumerate(trapeze_coords)]
+            modified_list = [num + 53.4*(j-1) if i % 2 != 0 else num for i, num in enumerate(trapeze_coords)]
         
             self.canvas.create_polygon(modified_list, outline="red", width=2, fill="red")
     
